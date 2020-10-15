@@ -2,6 +2,33 @@
 
 > clean google calender pwa
 
+## Details
+
+I've always been disatisfied with the design of most calendar apps. most of them are crazy cluttered with lots uf features i don't really use on a daily basis. My main usage of a calendar during the day is to quickly check what i have coming up next and to add some quick todos. 
+
+meet `calendr`. The design cannot really get more minimal. 
+It has PWA support so on most phones you should have an 'install' button on your browser when you access it. 
+
+I'm currently hosting it on firebase since it's free: https://calendr-771d1.web.app/#/
+
+Creating an event/todo is as simple as long-pressing a date, choosing a short title and submitting with enter. Deleting entries is just as simple. The duration of each created event is automatically set to 1 hour. Only the 100 upcoming events are fetched from the google api to keep load times short. Also only one-time events are fetched.
+
+### Further controls
+**swipe left**: next month
+
+**swipe right**: previous month
+
+**swipe up**: next year
+
+**swipe down**: previous year
+
+**long-press month name**: go to current day
+
+
+## What this App is NOT
+
+A full replacement for an agenda or weekly plan. It's really just an eye candy todo tracker with google calendar integration.
+
 ## Build Setup
 
 ``` bash
@@ -18,4 +45,4 @@ npm run build
 npm run build --report
 ```
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
