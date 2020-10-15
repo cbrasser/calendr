@@ -2,6 +2,9 @@
 
 > clean google calender pwa
 
+
+![Alt Text](https://github.com/cbrasser/calendr/edit/main/Peek 2020-10-15 23-31.gif)
+
 ## Details
 
 I've always been disatisfied with the design of most calendar apps. most of them are crazy cluttered with lots uf features i don't really use on a daily basis. My main usage of a calendar during the day is to quickly check what i have coming up next and to add some quick todos. 
