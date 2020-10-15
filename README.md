@@ -9,8 +9,21 @@ I've always been disatisfied with the design of most calendar apps. most of them
 meet `calendr`. The design cannot really get more minimal. 
 It has PWA support so on most phones you should have an 'install' button on your browser when you access it. 
 
-I'm currently hosting it on firebase since it's free
+I'm currently hosting it on firebase since it's free: https://calendr-771d1.web.app/#/
+
 Creating an event/todo is as simple as long-pressing a date, choosing a short title and submitting with enter. Deleting entries is just as simple. The duration of each created event is automatically set to 1 hour. Only the 100 upcoming events are fetched from the google api to keep load times short. Also only one-time events are fetched.
+
+### Further controls
+**swipe left**: next month
+
+**swipe right**: previous month
+
+**swipe up**: next year
+
+**swipe down**: previous year
+
+**long-press month name**: go to current day
+
 
 ## What this App is NOT
 
