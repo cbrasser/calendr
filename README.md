@@ -1,6 +1,7 @@
 # calendr
 
 > clean google calender pwa
+![Alt Text](Peek 2020-10-15 23-31.gif)
 
 ## Details
 
