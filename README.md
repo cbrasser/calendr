@@ -2,8 +2,7 @@
 
 > clean google calender pwa
 
-
-![Alt Text](https://github.com/cbrasser/calendr/edit/main/demo.gif)
+![](https://github.com/cbrasser/calendr/blob/main/demo.gif)
 
 ## Details
 
