@@ -1,5 +1,9 @@
 <template>
-  <div class="content">
+  <v-touch
+    class="content"
+    v-on:pinchin="changeScope(-1)"
+    v-on:pinchout="changeScope(1)"
+  >
     <!-- <div class="login-box" v-if="!loggedIn">
       <div class="login-content">
         <h3>Hello, Friend!</h3>
@@ -10,148 +14,32 @@
       </div>
     </div> -->
     <div class="main">
-      <div class="calendar-wrapper">
-        <v-touch
-          v-on:swipeleft="selectMonth(1)"
-          v-on:swiperight="selectMonth(-1)"
-          v-on:swipeup="selectYear(1)"
-          v-on:swipedown="selectYear(-1)"
-          v-on:press="selectCurrentDay()"
-          class="calendar-main"
-        >
-          <div class="calendar-header">
-            <!-- <span class="month past-month" @click="selectMonth(-1)">{{
-              getMonthName(selectedMonth - 1)
-            }}</span> -->
-            <div class="current-date">
-              <span ref="monthAndYear"
-                >{{ getMonthName(selectedMonth) }} {{ selectedYear }}</span
-              >
-            </div>
-            <!-- <span class="month next-month" @click="selectMonth(1)">{{
-              getMonthName(selectedMonth + 1)
-            }}</span> -->
-          </div>
-          <div class="calendar-day-names mobile" v-if="viewPort === 'mobile'">
-            <div
-              class="day-name"
-              v-for="index in [0, 1, 2, 3, 4, 5, 6]"
-              v-bind:key="'day_' + index"
-            >
-              {{ getDayName(index).substr(0, 2) }}
-            </div>
-          </div>
-          <div class="calendar-day-names" v-else>
-            <div
-              class="day-name"
-              v-for="index in [0, 1, 2, 3, 4, 5, 6]"
-              v-bind:key="'day_' + index"
-            >
-              {{ getDayName(index) }}
-            </div>
-          </div>
-
-          <div class="calendar-days">
-            <div
-              class="day prev-month"
-              v-for="pDay in firstDayInSelectedMonth"
-              v-bind:key="'pday_' + pDay"
-            >
-              <div
-                class="day-label"
-                @click="selectDate(pDay, selectedMonth - 1, selectedYear)"
-              >
-                <span>{{ pDay }}</span>
-              </div>
-            </div>
-
-            <v-touch
-              class="day"
-              v-for="day in daysInSelectedMonth"
-              v-bind:key="'day_' + day"
-              v-on:press="openCreationPopup(selectedYear, selectedMonth, day)"
-              v-on:tap="selectDate(day, selectedMonth, selectedYear)"
-            >
-              <div
-                class="day-label"
-                :data-day="day"
-                :data-nrEvents="
-                  eventsOnDay(day, selectedMonth, selectedYear).length
-                "
-                :class="{
-                  selected: day == selectedDay,
-                  current: isCurrentDay(day, selectedMonth, selectedYear),
-                }"
-              >
-                <input
-                  @keydown.enter="createEvent"
-                  placeholder="What would you like to do?"
-                  :data-year="selectedYear"
-                  :data-month="selectedMonth"
-                  :data-day="day"
-                  v-model="eventToCreate.title"
-                  class="appointment"
-                  type="text"
-                />
-                <span>{{ day }}</span>
-                <em></em>
-              </div>
-            </v-touch>
-            <div
-              class="day next-month"
-              v-for="nDay in 6 - lastDayInSelectedMonth"
-              v-bind:key="'nday_' + nDay"
-            >
-              <div
-                class="day-label"
-                @click="selectDate(nDay, selectedMonth + 1, selectedYear)"
-              >
-                <span>{{ nDay }}</span>
-              </div>
-            </div>
-          </div>
-        </v-touch>
-        <div
-          class="calendar-events"
-          v-bind:class="{
-            open: eventsOnSelectedDay().length > 0 && !creationPopupOpen,
-          }"
-        >
-          <div
-            class="event-wrapper"
-            v-for="event of eventsOnSelectedDay()"
-            v-bind:key="event.id"
-          >
-            <span class="event-title">
-              {{ event.summary }}
-            </span>
-            <div class="event-button" @click="deleteEvent(event.id)">
-              <i class="material-icons">backspace</i>
-            </div>
-            <!-- <input
-              type="text"
-              placeholder="title"
-              class="event-title"
-              v-model="event.summary"
-            /> -->
-          </div>
-        </div>
-        <!-- <div class="calendar-create" v-bind:class="{ open: creationPopupOpen }">
-          <span class="title">
-            {{ getDayName(eventToCreate.date.getDay()) }}
-            {{ eventToCreate.date.getDate() }}.
-            {{ getMonthName(eventToCreate.date.getMonth()) }}
-          </span>
-          <div class="form-wrapper">
-            <form v-on:submit="createEvent">
-              <input type="text" v-model="eventToCreate.title" />
-              <button type="submit">submit</button>
-            </form>
-          </div>
-        </div> -->
-      </div>
+      <MonthView
+        v-if="scope == 2"
+        v-bind:selectedDate="selectedDate"
+        v-bind:events="events"
+        v-bind:viewPort="viewPort"
+        v-on:selectMonth="selectMonth"
+        v-on:selectYear="selectYear"
+        v-on:selectDate="selectDate"
+        v-on:selectCurrentDay="selectCurrentDay"
+        v-on:createEvent="createEvent"
+        v-on:deleteEvent="deleteEvent"
+        v-on:pinchIn="changeScope(1)"
+        v-on:pinchOut="changeScope(-1)"
+      />
+      <DayView
+        v-if="scope == 1"
+        v-bind:selectedDate="selectedDate"
+        v-bind:events="events"
+        v-bind:viewPort="viewPort"
+        v-on:pinchOut="changeScope(-1)"
+        v-on:selectDay="selectDay"
+        v-on:createEvent="createEvent"
+        v-on:deleteEvent="deleteEvent"
+      />
     </div>
-  </div>
+  </v-touch>
 </template>
 
 <script>
@@ -159,7 +47,8 @@ import firebase from 'firebase';
 import VueTouch from 'vue-touch';
 import Vue from 'vue';
 
-import { WEEKDAYS, MONTHS } from './../util/constants';
+import MonthView from './../components/MonthView';
+import DayView from './../components/DayView';
 
 Vue.use(VueTouch);
 
@@ -172,14 +61,12 @@ export default {
       selectedDate: new Date(),
       events: [],
       viewPort: 'mobile',
-      creationPopupOpen: false,
-      eventToCreate: {
-        title: '',
-        date: new Date(),
-        end: undefined,
-        reminder: 0,
-      },
+      scope: 2,
     };
+  },
+  components: {
+    MonthView,
+    DayView,
   },
   computed: {
     currentMonth() {
@@ -228,95 +115,35 @@ export default {
     },
   },
   methods: {
-    buildDateTime(year, month, day, hours) {
-      const dateTime = `${year}-${month}-${day}T${String(hours).padStart(
-        2,
-        '0',
-      )}:00:00`;
-      return dateTime;
+    changeScope(modifier) {
+      this.scope = Math.max(1, Math.min(this.scope + modifier, 2));
     },
-    buildEventObject() {
-      var event = {
-        summary: this.eventToCreate.title,
-        end: {},
-        start: {},
-      };
-      event.start.dateTime = this.eventToCreate.date.toISOString();
-      this.eventToCreate.date.setHours(this.eventToCreate.date.getHours() + 1);
-      event.end.dateTime = this.eventToCreate.date.toISOString();
-      if (this.eventToCreate.reminder > 0) {
-        const reminder = {
-          useDefault: false,
-          overrides: [
-            { method: 'popup', minutes: this.eventToCreate.reminder },
-          ],
-        };
-        event.reminders = reminder;
-      }
-
-      return event;
-    },
-    createEvent() {
-      const event = this.buildEventObject();
-      var request = gapi.client.calendar.events.insert({
+    createEvent(event) {
+      const request = gapi.client.calendar.events.insert({
         calendarId: 'primary',
         resource: event,
       });
-      request.execute((event) => {
+      request.execute(() => {
         console.log('created');
-        this.eventToCreate.title = '';
         this.getCalendar();
       });
     },
     deleteEvent(id) {
-      var request = gapi.client.calendar.events.delete({
+      const request = gapi.client.calendar.events.delete({
         calendarId: 'primary',
         eventId: id,
       });
-      request.execute((event) => {
+      request.execute(() => {
         console.log('deleted');
-        this.events = this.events.filter((e) => e.id != id);
+        this.events = this.events.filter((e) => e.id !== id);
         this.getCalendar();
       });
     },
-    openCreationPopup(year, month, day) {
-      //this.creationPopupOpen = true;
-      this.selectedDate = new Date(year, month, day);
-
-      document
-        .querySelector(
-          `[data-year='${year}'][data-month='${month}'][data-day='${day}']`,
-        )
-        .focus();
-      this.eventToCreate.date = new Date(year, month, day, 12);
-    },
-    eventsOnDay(day, month, year) {
-      return this.events.filter((e) =>
-        this.onSameDay(e.date, new Date(year, month, day)),
-      );
-    },
-    eventsOnSelectedDay() {
-      return this.events.filter((e) => this.isOnSelectedDay(e.date));
-    },
-    onSameDay(date1, date2) {
-      return (
-        date1.getDate() === date2.getDate() &&
-        date1.getMonth() === date2.getMonth() &&
-        date1.getFullYear() === date2.getFullYear()
-      );
-    },
-    isOnSelectedDay(date) {
-      return (
-        date.getDate() === this.selectedDay &&
-        date.getMonth() === this.selectedMonth &&
-        date.getFullYear() === this.selectedYear
-      );
-    },
-    isCurrentDay(day, month, year) {
-      return (
-        day === this.currentDay &&
-        month === this.currentMonth &&
-        year === this.currentYear
+    selectDay(modifier) {
+      this.selectedDate = new Date(
+        this.selectedYear,
+        this.selectedMonth,
+        this.selectedDay + modifier,
       );
     },
     selectMonth(modifier) {
@@ -342,30 +169,25 @@ export default {
         this.currentDay,
       );
     },
-    selectDate(day, month, year) {
-      console.log('asdf');
+    selectDate({ day, month, year }) {
       this.selectedDate = new Date(year, month, day);
       this.creationPopupOpen = false;
     },
-    getMonthName(index) {
-      return index < 0 ? MONTHS[11] : MONTHS[index % 12];
-    },
-    getDayName(index) {
-      return WEEKDAYS[index];
-    },
+
     async loginWithGoogle() {
       const googleUser = await gapi.auth2.getAuthInstance().signIn();
-      const token = googleUser.getAuthResponse().id_token;
+      console.log(googleUser);
+      // const token = googleUser.getAuthResponse().id_token;
       // const credential = firebase.auth.GoogleAuthProvider.credential(token);
       // const result = await firebase
       //  .auth()
       //  .signInAndRetrieveDataWithCredential(credential);
-      //console.log(result);
+      // console.log(result);
       this.getCalendar();
       this.$router.push({ name: 'Home', params: {} });
     },
     async logout() {
-      //firebase.auth().signOut();
+      // firebase.auth().signOut();
       gapi.auth2.getAuthInstance().signOut();
     },
     async getCalendar() {
@@ -407,6 +229,7 @@ export default {
         this.getCalendar();
       } else {
         const googleUser = await gapi.auth2.getAuthInstance().signIn();
+        console.log(googleUser);
         this.getCalendar();
       }
     },
@@ -671,7 +494,9 @@ export default {
 
   .calendar-events {
     padding: 1rem;
-    width: calc(100% - 2rem);
+  }
+  .calendar-event-add input {
+    width: 242px !important;
   }
 }
 
